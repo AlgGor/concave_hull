@@ -5,7 +5,7 @@
 
 %% Params
 clear;
-BETA = 2;                       % greater than 1 
+BETA = 1.2;                       % greater than 1 
 N_POINTS = 1000;          % points per 1 unit
 ALPHA = 1/BETA;           % less than 1  
 
@@ -34,16 +34,17 @@ u_prev_vec = init_u_vec;
 x_vec = init_x_vec;
 ind_spec = init_ind_spec;
 n_add_pts = 0;
+ind_add = [];
 disp([newline, newline]);
 
 close all;
-graph_raw(x_vec, u_prev_vec, BETA, 0, ind_spec);
+graph_raw(x_vec, u_prev_vec, BETA, 0, ind_spec, ind_add);
  
 for step = 1 : N_STEPS
     u_new_vec = u_prev_vec;
     for k = 1 : (step + n_add_pts)
-        n_tmp_pts = 0;
-        ind_bk = k + 2;                                                          
+        n_tmp_pts = 0;                                                              % number of added points in (b^(k-1),b^k]
+        ind_bk = k + 2;                                              
         ind_left_key_pt = ind_spec(ind_bk - 2);                           % index of \beta^(k-2) in x_vec
         ind_phi_left = ind_spec(ind_bk - 1);                                % index of \beta^(k-1)   in x_vec     
         ind_phi_right = ind_spec(ind_bk);                                   % index of \beta^(k)   in x_vec
@@ -75,6 +76,9 @@ for step = 1 : N_STEPS
                                                     u_prev_vec(ind_left_key_pt : ind_phi_right), BETA);
                     u_new_vec((ind_y_k+1) : ind_phi_right) = first_case( x_vec(ind_y_k : ind_phi_right ), ...
                                                                                                     u_prev_vec(ind_y_k : ind_phi_right));
+                    n_tmp_pts = n_tmp_pts + 1;
+                    ind_spec = cat(2, ind_spec, ind_y_k);
+                    ind_add = cat(2, ind_add, ind_y_k);
                 else
                     disp(['step=',num2str(step),', k=', num2str(k), ', simple 2 type']);
                     ind_y_k = ind_phi_left;
@@ -98,6 +102,9 @@ for step = 1 : N_STEPS
                                                     u_prev_vec(ind_phi_left : ind_right_key_pt), BETA);
                     u_new_vec((ind_phi_left+1) : ind_z_k) = first_case( x_vec(ind_phi_left : ind_z_k), ...
                                                                                                         u_prev_vec(ind_phi_left : ind_z_k));
+                    n_tmp_pts = n_tmp_pts + 1;
+                    ind_spec = cat(2, ind_spec, ind_z_k);
+                    ind_add = cat(2, ind_add, ind_z_k);
                 else
                     disp(['step=',num2str(step),', k=', num2str(k), ', simple 3 type']);
                     ind_z_k = ind_phi_left;
@@ -107,7 +114,7 @@ for step = 1 : N_STEPS
                                                         u_prev_vec(ind_z_k : ind_right_key_pt), BETA); 
                 u_new_vec((ind_z_k+1): ind_phi_right) = u_tmp;  % unlike 2 situation, it is ok   
             case 4
-                disp(['step=',num2str(step),', k=', num2str(k), ', SOPHISTICATED 4 type']);
+                
                 is_y_k_exists = check_y_k_ex(slone_coeff, ...
                                                         x_vec( (ind_phi_left - 2) : ind_phi_left), ...
                                                         u_prev_vec( (ind_phi_left - 2) : ind_phi_left));
@@ -117,18 +124,26 @@ for step = 1 : N_STEPS
                 if is_y_k_exists
                     ind_y_k = find_y_k(ind_left_key_pt, ind_phi_left, ...
                                                     x_vec(ind_left_key_pt : ind_phi_right), ...
-                                                    u_prev_vec(ind_left_key_pt : ind_phi_right), BETA);   
+                                                    u_prev_vec(ind_left_key_pt : ind_phi_right), BETA);  
+                    n_tmp_pts = n_tmp_pts + 1;
+                    ind_spec = cat(2, ind_spec, ind_y_k);
+                    ind_add = cat(2, ind_add, ind_y_k);
                 end
                 if is_z_k_exists
                     ind_z_k = find_z_k(ind_phi_left, ind_phi_right, ...
                                                     x_vec(ind_phi_left : ind_right_key_pt), ...
                                                     u_prev_vec(ind_phi_left : ind_right_key_pt), BETA);
+                    n_tmp_pts = n_tmp_pts + 1;
+                    ind_spec = cat(2, ind_spec, ind_z_k);
+                    ind_add = cat(2, ind_add, ind_z_k);
                 end
                 if ~is_y_k_exists && ~is_z_k_exists
+                    disp(['step=',num2str(step),', k=', num2str(k), ', simple 4 type']);
                     u_new_vec((ind_phi_left+1) : ind_phi_right) = fourth_case(ind_left_key_pt, ind_phi_left, ind_phi_right, ...
                                                                                                             x_vec(ind_left_key_pt : ind_right_key_pt), ...
                                                                                                             u_prev_vec(ind_left_key_pt : ind_right_key_pt));
                 elseif is_y_k_exists && ~is_z_k_exists
+                    disp(['step=',num2str(step),', k=', num2str(k), ', SOPHISTICATED 4 type']);
                     u_new_vec((ind_phi_left+1) : ind_y_k) = fourth_case(ind_left_key_pt, ind_phi_left, ind_y_k, ...
                                                                                                 x_vec(ind_left_key_pt : ind_right_key_pt), ...
                                                                                                 u_prev_vec(ind_left_key_pt : ind_right_key_pt));
@@ -136,6 +151,7 @@ for step = 1 : N_STEPS
                                                                                                 x_vec(ind_z_k : ind_right_key_pt), ... 
                                                                                                 u_prev_vec(ind_z_k : ind_right_key_pt), BETA); 
                 elseif ~is_y_k_exists && is_z_k_exists
+                    disp(['step=',num2str(step),', k=', num2str(k), ', SOPHISTICATED 4 type']);
                     u_new_vec((ind_phi_left+1) : ind_z_k) = second_case(  ind_left_key_pt, ind_z_k,  ...
                                                                                                         x_vec(ind_left_key_pt : ind_phi_right), ... 
                                                                                                         u_prev_vec(ind_left_key_pt : ind_phi_right), BETA);
@@ -143,6 +159,7 @@ for step = 1 : N_STEPS
                                                                                                             x_vec(ind_left_key_pt : ind_right_key_pt), ...
                                                                                                             u_prev_vec(ind_left_key_pt : ind_right_key_pt));                                                                                 
                 elseif is_y_k_exists && is_z_k_exists
+                    disp(['step=',num2str(step),', k=', num2str(k), ', SOPHISTICATED 4 type']);
                     ind_min = min(ind_y_k, ind_z_k); 
                     ind_max = max(ind_y_k, ind_z_k);
                     forth_case_appears = ind_y_k > ind_z_k;
@@ -165,16 +182,15 @@ for step = 1 : N_STEPS
         end
         
     end
-    graph_raw(x_vec, u_new_vec, BETA, step, ind_spec);
+    graph_raw(x_vec, u_new_vec, BETA, step, ind_spec, ind_add);
     
-    tmp_n_pts =  ceil(N_POINTS * (BETA^(step+2) - x_vec(end)));
-    x_vec = cat(2, x_vec(1:end-1), linspace(x_vec(end), BETA^(step+2), tmp_n_pts+1));
-    u_prev_vec = cat(2, u_new_vec, 0 * (1 : tmp_n_pts));         
-    ind_spec = cat(2, ind_spec, numel(x_vec));
+    tmp_grid_pts =  ceil(N_POINTS * (BETA^(step+2) - x_vec(end)));
+    x_vec = cat(2, x_vec(1:end-1), linspace(x_vec(end), BETA^(step+2), tmp_grid_pts+1));
+    u_prev_vec = cat(2, u_new_vec, 0 * (1 : tmp_grid_pts));   
     
-    % не забудь сделать корректировку индексов массива ключевых точек с
-    % учетом добавленных на каждом шаге
     n_add_pts = n_add_pts + n_tmp_pts;
+    ind_spec = sort(cat(2, ind_spec, numel(x_vec)));
+       
 end
 
 %%  Testing app version
@@ -184,10 +200,10 @@ close all;
 BETA = 2;       
 N_STEPS = 3;
 
-[x_vec, u_mat, ind_spec] = conc_sh_bld(N_STEPS, BETA);
+[x_vec, u_mat, ind_spec, ind_add] = conc_sh_bld(N_STEPS, BETA);
 
 for ind_step = 1:numel(u_mat(:,1))
-    graph_raw(x_vec, u_mat(ind_step,:), BETA, ind_step-1, ind_spec);
+    graph_raw(x_vec, u_mat(ind_step,:), BETA, ind_step-1, ind_spec, ind_add);
 end
 
         

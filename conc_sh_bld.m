@@ -1,6 +1,7 @@
-function [x_vec, u_mat, ind_spec] = conc_sh_bld(N_STEPS, BETA) 
+function [x_vec, u_mat, ind_spec, ind_add] = conc_sh_bld(N_STEPS, BETA) 
 
     N_POINTS = 100; 
+    
     x_spec_vec = BETA .^ (-1:2); 
 
     init_grid = linspace(x_spec_vec(1), x_spec_vec(2), ceil(N_POINTS * (x_spec_vec(2) - x_spec_vec(1)))+1);
@@ -95,6 +96,7 @@ function [x_vec, u_mat, ind_spec] = conc_sh_bld(N_STEPS, BETA)
     u_mat(:, ind_phi_right + 1:end) = [];
     x_vec(ind_phi_right +1:end) = [];
     ind_spec = ind_spec(1:end-1);
+    ind_add = [];
     
 end
 
