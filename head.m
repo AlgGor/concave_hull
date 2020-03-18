@@ -5,7 +5,7 @@
 
 %% Params
 clear;
-BETA = 1.2;                       % greater than 1 
+BETA = 1.1;                       % greater than 1 
 N_POINTS = 1000;          % points per 1 unit
 ALPHA = 1/BETA;           % less than 1  
 
@@ -76,9 +76,13 @@ for step = 1 : N_STEPS
                                                     u_prev_vec(ind_left_key_pt : ind_phi_right), BETA);
                     u_new_vec((ind_y_k+1) : ind_phi_right) = first_case( x_vec(ind_y_k : ind_phi_right ), ...
                                                                                                     u_prev_vec(ind_y_k : ind_phi_right));
-                    n_tmp_pts = n_tmp_pts + 1;
-                    ind_spec = cat(2, ind_spec, ind_y_k);
-                    ind_add = cat(2, ind_add, ind_y_k);
+                    if ind_y_k > (ind_phi_right+1)                            
+                        n_tmp_pts = n_tmp_pts + 1;
+                        ind_spec = cat(2, ind_spec, ind_y_k);
+                        ind_add = cat(2, ind_add, ind_y_k);
+                    else
+                        is_y_k_exists = false;
+                    end
                 else
                     disp(['step=',num2str(step),', k=', num2str(k), ', simple 2 type']);
                     ind_y_k = ind_phi_left;
@@ -102,9 +106,13 @@ for step = 1 : N_STEPS
                                                     u_prev_vec(ind_phi_left : ind_right_key_pt), BETA);
                     u_new_vec((ind_phi_left+1) : ind_z_k) = first_case( x_vec(ind_phi_left : ind_z_k), ...
                                                                                                         u_prev_vec(ind_phi_left : ind_z_k));
-                    n_tmp_pts = n_tmp_pts + 1;
-                    ind_spec = cat(2, ind_spec, ind_z_k);
-                    ind_add = cat(2, ind_add, ind_z_k);
+                   if ind_z_k > (ind_phi_right+1)
+                        n_tmp_pts = n_tmp_pts + 1;
+                        ind_spec = cat(2, ind_spec, ind_z_k);
+                        ind_add = cat(2, ind_add, ind_z_k);
+                    else
+                         is_z_k_exists = false;
+                    end
                 else
                     disp(['step=',num2str(step),', k=', num2str(k), ', simple 3 type']);
                     ind_z_k = ind_phi_left;
@@ -125,28 +133,36 @@ for step = 1 : N_STEPS
                     ind_y_k = find_y_k(ind_left_key_pt, ind_phi_left, ...
                                                     x_vec(ind_left_key_pt : ind_phi_right), ...
                                                     u_prev_vec(ind_left_key_pt : ind_phi_right), BETA);  
-                    n_tmp_pts = n_tmp_pts + 1;
-                    ind_spec = cat(2, ind_spec, ind_y_k);
-                    ind_add = cat(2, ind_add, ind_y_k);
+                    if ind_y_k > (ind_phi_right+1)                            
+                        n_tmp_pts = n_tmp_pts + 1;
+                        ind_spec = cat(2, ind_spec, ind_y_k);
+                        ind_add = cat(2, ind_add, ind_y_k);
+                    else
+                        is_y_k_exists = false;
+                    end
                 end
                 if is_z_k_exists
                     ind_z_k = find_z_k(ind_phi_left, ind_phi_right, ...
                                                     x_vec(ind_phi_left : ind_right_key_pt), ...
                                                     u_prev_vec(ind_phi_left : ind_right_key_pt), BETA);
-                    n_tmp_pts = n_tmp_pts + 1;
-                    ind_spec = cat(2, ind_spec, ind_z_k);
-                    ind_add = cat(2, ind_add, ind_z_k);
+                    if ind_z_k > (ind_phi_right+1)
+                        n_tmp_pts = n_tmp_pts + 1;
+                        ind_spec = cat(2, ind_spec, ind_z_k);
+                        ind_add = cat(2, ind_add, ind_z_k);
+                    else
+                         is_z_k_exists = false;
+                    end
                 end
                 if ~is_y_k_exists && ~is_z_k_exists
                     disp(['step=',num2str(step),', k=', num2str(k), ', simple 4 type']);
                     u_new_vec((ind_phi_left+1) : ind_phi_right) = fourth_case(ind_left_key_pt, ind_phi_left, ind_phi_right, ...
                                                                                                             x_vec(ind_left_key_pt : ind_right_key_pt), ...
-                                                                                                            u_prev_vec(ind_left_key_pt : ind_right_key_pt));
+                                                                                                            u_prev_vec(ind_left_key_pt : ind_right_key_pt), BETA);
                 elseif is_y_k_exists && ~is_z_k_exists
                     disp(['step=',num2str(step),', k=', num2str(k), ', SOPHISTICATED 4 type']);
                     u_new_vec((ind_phi_left+1) : ind_y_k) = fourth_case(ind_left_key_pt, ind_phi_left, ind_y_k, ...
                                                                                                 x_vec(ind_left_key_pt : ind_right_key_pt), ...
-                                                                                                u_prev_vec(ind_left_key_pt : ind_right_key_pt));
+                                                                                                u_prev_vec(ind_left_key_pt : ind_right_key_pt), BETA);
                     u_new_vec((ind_z_k+1): ind_phi_right) = third_case(  ind_z_k, ind_phi_right,  ...
                                                                                                 x_vec(ind_z_k : ind_right_key_pt), ... 
                                                                                                 u_prev_vec(ind_z_k : ind_right_key_pt), BETA); 
@@ -157,7 +173,7 @@ for step = 1 : N_STEPS
                                                                                                         u_prev_vec(ind_left_key_pt : ind_phi_right), BETA);
                    u_new_vec((ind_z_k+1) : ind_phi_right) = fourth_case(ind_left_key_pt, ind_z_k, ind_phi_right, ...
                                                                                                             x_vec(ind_left_key_pt : ind_right_key_pt), ...
-                                                                                                            u_prev_vec(ind_left_key_pt : ind_right_key_pt));                                                                                 
+                                                                                                            u_prev_vec(ind_left_key_pt : ind_right_key_pt), BETA);                                                                                 
                 elseif is_y_k_exists && is_z_k_exists
                     disp(['step=',num2str(step),', k=', num2str(k), ', SOPHISTICATED 4 type']);
                     ind_min = min(ind_y_k, ind_z_k); 
@@ -170,7 +186,7 @@ for step = 1 : N_STEPS
                     if fourth_case_appears 
                         u_new_vec((ind_min+1) : ind_max) = fourth_case(ind_left_key_pt, ind_min, ind_max, ...
                                                                                                 x_vec(ind_left_key_pt : ind_right_key_pt), ...
-                                                                                                u_prev_vec(ind_left_key_pt : ind_right_key_pt));
+                                                                                                u_prev_vec(ind_left_key_pt : ind_right_key_pt), BETA);
                     else
                         u_new_vec((ind_min+1) : ind_max) = first_case( x_vec(ind_min : ind_max), ...
                                                                                             u_prev_vec(ind_min : ind_max));
