@@ -182,6 +182,7 @@ for step = 1 : N_STEPS
         end
         
     end
+    disp('');
     graph_raw(x_vec, u_new_vec, BETA, step, ind_spec, ind_add);
     
     tmp_grid_pts =  ceil(N_POINTS * (BETA^(step+2) - x_vec(end)));
