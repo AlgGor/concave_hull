@@ -6,21 +6,18 @@
 %% Params
 clear;
 BETA = 1.1;                       % greater than 1 
-N_POINTS = 1000;          % points per 1 unit
+N_POINTS = 10000;          % points per 1 unit
 ALPHA = 1/BETA;           % less than 1  
 
 %% Creating initial grids
-x_spec_vec = BETA .^ (-1:2); 
+x_spec_vec = BETA .^ (-1:1); 
 
 init_grid = linspace(x_spec_vec(1), x_spec_vec(2), ceil(N_POINTS * (x_spec_vec(2) - x_spec_vec(1)))+1);
-ind_spec = 1:4;
+ind_spec = 1:3;
 ind_spec(2) = numel(init_grid);
-init_grid = [init_grid(1:end-1), ...
-                    linspace(x_spec_vec(2), x_spec_vec(3), ceil(N_POINTS * (x_spec_vec(3) - x_spec_vec(2)))+1)];
-ind_spec(3) = numel(init_grid);
 init_x_vec = [init_grid(1:end-1), ...
-                linspace(x_spec_vec(3), x_spec_vec(4), ceil(N_POINTS * (x_spec_vec(4) - x_spec_vec(3)))+1)];
-ind_spec(4) = numel(init_x_vec);
+                    linspace(x_spec_vec(2), x_spec_vec(3), ceil(N_POINTS * (x_spec_vec(3) - x_spec_vec(2)))+1)];
+ind_spec(3) = numel(init_x_vec);
 clear init_grid x_spec_vec;
 init_ind_spec = ind_spec; 
 init_u_vec = double(init_x_vec <= 1);
@@ -30,7 +27,7 @@ init_u_vec = double(init_x_vec <= 1);
 
 N_STEPS = 5;
 
-u_prev_vec = init_u_vec;
+u_new_vec = init_u_vec;
 x_vec = init_x_vec;
 ind_spec = init_ind_spec;
 n_add_pts = 0;
@@ -38,10 +35,16 @@ ind_add = [];
 disp([newline, newline]);
 
 close all;
-graph_raw(x_vec, u_prev_vec, BETA, 0, ind_spec, ind_add);
+graph_raw(x_vec, u_new_vec, BETA, 0, ind_spec, ind_add);
  
 for step = 1 : N_STEPS
+    
+    tmp_grid_pts =  ceil(N_POINTS * (BETA^(step+1) - x_vec(end)));
+    x_vec = cat(2, x_vec(1:end-1), linspace(x_vec(end), BETA^(step+1), tmp_grid_pts+1));
+    u_prev_vec = cat(2, u_new_vec, 0 * (1 : tmp_grid_pts));  
     u_new_vec = u_prev_vec;
+    ind_spec = sort(cat(2, ind_spec, numel(x_vec)));
+    
     for k = 1 : (step + n_add_pts)
         n_tmp_pts = 0;                                                              % number of added points in (b^(k-1),b^k]
         ind_bk = k + 2;                                              
@@ -178,7 +181,7 @@ for step = 1 : N_STEPS
                     disp(['step=',num2str(step),', k=', num2str(k), ', SOPHISTICATED 4 type']);
                     ind_min = min(ind_y_k, ind_z_k); 
                     ind_max = max(ind_y_k, ind_z_k);
-                    forth_case_appears = ind_y_k > ind_z_k;
+                    fourth_case_appears = ind_y_k > ind_z_k;
                     
                     u_new_vec((ind_phi_left+1) : ind_min ) = second_case(  ind_left_key_pt, ind_min,  ...
                                                                                                         x_vec(ind_left_key_pt : ind_phi_right), ... 
@@ -198,16 +201,10 @@ for step = 1 : N_STEPS
         end
         
     end
-    disp('');
-    graph_raw(x_vec, u_new_vec, BETA, step, ind_spec, ind_add);
+
+    graph_raw(x_vec, u_new_vec, BETA, step, ind_spec, ind_add);    
+    n_add_pts = n_add_pts + n_tmp_pts;  
     
-    tmp_grid_pts =  ceil(N_POINTS * (BETA^(step+2) - x_vec(end)));
-    x_vec = cat(2, x_vec(1:end-1), linspace(x_vec(end), BETA^(step+2), tmp_grid_pts+1));
-    u_prev_vec = cat(2, u_new_vec, 0 * (1 : tmp_grid_pts));   
-    
-    n_add_pts = n_add_pts + n_tmp_pts;
-    ind_spec = sort(cat(2, ind_spec, numel(x_vec)));
-       
 end
 
 %%  Testing app version

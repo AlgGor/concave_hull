@@ -6,7 +6,7 @@ function graph_raw(x_vec, y_vec, BETA, step, ind_spec, ind_add, varargin)
     else
         figure();
         my_ax = gca;
-    end
+    end 
     blackcolor = [0 0 0];
     
     leap_ind = find(y_vec, 1, 'last');
