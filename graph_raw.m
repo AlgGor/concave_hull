@@ -23,7 +23,7 @@ function graph_raw(x_vec, y_vec, BETA, step, ind_spec, ind_add, varargin)
     y_vec(leap_ind) = NaN;  
     
     % main part and leap
-    plot(my_ax, x_vec, y_vec, 'linewidth', 1.5, 'color', blackcolor);
+    plot(my_ax, x_vec(1:leap_ind), y_vec(1:leap_ind), 'linewidth', 1.5, 'color', blackcolor);
     xlim(my_ax,[1/BETA BETA^step * min(1+ZERO_PART, BETA + 0.01)]); % you can make BETA + 0.05 in the end to add x axe arrow
     hold(my_ax, 'on');
     plot(my_ax,  [x_vec(leap_ind)  BETA^(step+2)], [0 0], 'linewidth', 1.5, 'color', blackcolor);
@@ -40,14 +40,15 @@ function graph_raw(x_vec, y_vec, BETA, step, ind_spec, ind_add, varargin)
     if ~isempty(edge_ind_add) 
         scatter(my_ax, x_vec(ind_add(1:edge_ind_add)), y_vec(ind_add(1:edge_ind_add)) , 12, 'o', 'filled', 'MarkerFaceColor', 'r');
     end
-    legend(my_ax, ['f_{',num2str(step),'}(x)'], 'location','northeast');
-
+    
+    if nargin < 7
+        legend(my_ax, ['f_{',num2str(step),'}(x)'], 'location','northeast');
+    end
+    
     % axes meta to be pretty
     my_ax.TickLabelInterpreter = 'latex';
     my_ax.MinorGridAlpha = 0.17;
-%     [left bottom width height] = my_ax.Position;
-%     my_ax.FontUnits = 'normalized';
-%    my_ax.FontSize = 12 - fix(step/2);
+    my_ax.FontSize = 14;
     my_ax.TickDir = 'both';
     box(my_ax,'off');
     grid(my_ax, 'on');
