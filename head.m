@@ -5,9 +5,10 @@
 
 %% Params
 clear;
-BETA = 1.1;                       % greater than 1 
-N_POINTS = 10000;          % points per 1 unit
+BETA = 2;                       % greater than 1 
+N_POINTS = 1000;          % points per 1 unit
 ALPHA = 1/BETA;           % less than 1  
+my_eps = 1/(2*N_POINTS);
 
 %% Creating initial grids
 x_spec_vec = BETA .^ (-1:1); 
@@ -25,7 +26,7 @@ init_u_vec = double(init_x_vec <= 1);
 
 %% Concave shell construction
 
-N_STEPS = 5;
+N_STEPS = 9;
 
 u_new_vec = init_u_vec;
 x_vec = init_x_vec;
@@ -36,13 +37,16 @@ disp([newline, newline]);
 
 close all;
 graph_raw(x_vec, u_new_vec, BETA, 0, ind_spec, ind_add);
- 
+%print_to_pict(0,BETA); 
+
 for step = 1 : N_STEPS
     
     tmp_grid_pts =  ceil(N_POINTS * (BETA^(step+1) - x_vec(end)));
     x_vec = cat(2, x_vec(1:end-1), linspace(x_vec(end), BETA^(step+1), tmp_grid_pts+1));
+ 
     u_prev_vec = cat(2, u_new_vec, 0 * (1 : tmp_grid_pts));  
     u_new_vec = u_prev_vec;
+
     ind_spec = sort(cat(2, ind_spec, numel(x_vec)));
     
     for k = 1 : (step + n_add_pts)
@@ -57,9 +61,9 @@ for step = 1 : N_STEPS
                                                                                 x_vec(ind_phi_left), u_prev_vec(ind_phi_left), ...
                                                                                 x_vec(ind_phi_right), u_prev_vec(ind_phi_right));
         % is key_line less on the left side with taking into account the numeric error  
-        is_phi_less_left = (phi_left < u_prev_vec(ind_left_key_pt+1)) && (abs(u_prev_vec(ind_left_key_pt+1) - phi_left)> 2*eps);     
+        is_phi_less_left = (phi_left < u_prev_vec(ind_left_key_pt+1)) && (abs(u_prev_vec(ind_left_key_pt+1) - phi_left)> my_eps);     
         % is key_line less on the right side with taking into account the numeric error  
-        is_phi_less_right =(phi_right < u_prev_vec(ind_right_key_pt)) && (abs(u_prev_vec(ind_right_key_pt) - phi_right)> 2*eps);              
+        is_phi_less_right =(phi_right < u_prev_vec(ind_right_key_pt)) && (abs(u_prev_vec(ind_right_key_pt) - phi_right)> my_eps);              
         situation_type = sit_type_determ(is_phi_less_left, is_phi_less_right);
           
         switch situation_type 
@@ -201,10 +205,12 @@ for step = 1 : N_STEPS
         end
         
     end
-
-    graph_raw(x_vec, u_new_vec, BETA, step, ind_spec, ind_add);    
+    my_eps = min( min(abs(diff(u_new_vec(ind_spec(2):ind_phi_right)))), 1/(2*N_POINTS));
+    graph_raw(x_vec, u_new_vec, BETA, step, ind_spec, ind_add);   
     n_add_pts = n_add_pts + n_tmp_pts;  
-    
+%     if (step == 4) || (step == 8)
+%         print_to_pict(step,BETA); 
+%     end
 end
 
 %%  Testing app version
