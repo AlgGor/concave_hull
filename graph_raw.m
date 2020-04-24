@@ -40,7 +40,7 @@ function graph_raw(x_vec, y_vec, BETA, step, ind_spec, ind_add, varargin)
     if ~isempty(edge_ind_add) 
         scatter(my_ax, x_vec(ind_add(1:edge_ind_add)), y_vec(ind_add(1:edge_ind_add)) , 12, 'o', 'filled', 'MarkerFaceColor', 'r');
     end
-    %legend(my_ax, ['f_{',num2str(step),'}(x)'], 'location','northeast');
+    legend(my_ax, ['f_{',num2str(step),'}(x)'], 'location','northeast');
 
     % axes meta to be pretty
     my_ax.TickLabelInterpreter = 'latex';
@@ -54,6 +54,4 @@ function graph_raw(x_vec, y_vec, BETA, step, ind_spec, ind_add, varargin)
     grid(my_ax, 'minor');
     
     hold(my_ax, 'off');
-    
-    
 end

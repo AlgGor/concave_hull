@@ -5,7 +5,7 @@
 
 %% Params
 clear;
-BETA = 1.1;                       % greater than 1 
+BETA = 2;                       % greater than 1 
 N_POINTS = 1000;          % points per 1 unit
 ALPHA = 1/BETA;           % less than 1  
 my_eps = 1/(2*N_POINTS);
@@ -26,7 +26,7 @@ init_u_vec = double(init_x_vec <= 1);
 
 %% Concave shell construction
 
-N_STEPS = 5;
+N_STEPS = 9;
 
 u_new_vec = init_u_vec;
 x_vec = init_x_vec;
@@ -37,7 +37,7 @@ disp([newline, newline]);
 
 close all;
 graph_raw(x_vec, u_new_vec, BETA, 0, ind_spec, ind_add);
-print_to_pict(0,BETA); 
+%print_to_pict(0,BETA); 
 
 for step = 1 : N_STEPS
     
@@ -208,7 +208,9 @@ for step = 1 : N_STEPS
     my_eps = min( min(abs(diff(u_new_vec(ind_spec(2):ind_phi_right)))), 1/(2*N_POINTS));
     graph_raw(x_vec, u_new_vec, BETA, step, ind_spec, ind_add);   
     n_add_pts = n_add_pts + n_tmp_pts;  
-    
+%     if (step == 4) || (step == 8)
+%         print_to_pict(step,BETA); 
+%     end
 end
 
 %%  Testing app version

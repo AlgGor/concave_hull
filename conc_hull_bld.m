@@ -1,6 +1,6 @@
 %This app allows you to build concave shell for binary put option's price
 
-function [x_vec, u_mat, ind_spec, ind_add] = conc_sh_bld(N_STEPS, BETA, app) 
+function [x_vec, u_mat, ind_spec, ind_add] = conc_hull_bld(N_STEPS, BETA, app) 
 
     if BETA < 2
         if BETA < 1.1
